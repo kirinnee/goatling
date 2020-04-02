@@ -13,7 +13,7 @@ type Server struct {
 }
 
 func New() *Server {
-	return &Server{}
+	return &Server{mux.NewRouter()}
 }
 
 func resp(w http.ResponseWriter, any interface{}) {

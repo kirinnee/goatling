@@ -17,35 +17,43 @@ go get gitlab.com/kiringo/goatling
 
 # Using Basic Server
 ```go
+import (
+	"flag"
+	goat "gitlab.com/kiringo/goatling"
+	"log"
+	"net/http"
+)
+
 // Sample Response Model
 type User struct {
-    Name string `json:"name"`
-    Email string `json:"email"`
+	Name string `json:"name"`
+	Email string `json:"email"`
 }
 
 // Sample Endpoint
-func Home(g goat.Goat) *goat.ServerResponse{  
-       user := User{
-            Name: "kirin",
-            Email: "kirinnee97@gmail.com",
-       }
-    return goat.Ok(user)
+func Home(g goat.Goat) *goat.ServerResponse{
+	user := User{
+		Name: "kirin",
+		Email: "kirinnee97@gmail.com",
+	}
+	return goat.OK(user)
 }
 
 
 func main() {
 
-    var addr = flag.String("addr", ":9000", "http service address")
+	var addr = flag.String("addr", ":9000", "http service address")
 	flag.Parse()
-    // Normal Server 
-    r := goat.New()
+	// Normal Server
+	r := goat.New()
 
-    // Now you can use r and a like gorilla mux server
-    r.Serve("/", Home).Methods("GET")
+	// Now you can use r and a like gorilla mux server
+	r.Serve("/", Home).Methods("GET")
 
 	log.Println("Listening")
-	log.Fatal(http.ListenAndServe(*addr, s))
+	log.Fatal(http.ListenAndServe(*addr, r))
 }
+
 ```
 
 ## Accessing Body as JSON

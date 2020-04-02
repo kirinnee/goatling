@@ -19,7 +19,7 @@ func NewAuth(domain string) *Auth0Server {
 	return &Auth0Server{
 		domain:     domain,
 		middleware: jwtMiddleware(domain),
-		Server:     &Server{},
+		Server:     New(),
 	}
 }
 
