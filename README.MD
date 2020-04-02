@@ -61,15 +61,15 @@ func main() {
 func Home(g goat.Goat) *goat.ServerResponse{
     var user User
     g.Body(&user) //Reads request into user struct
-    return goat.Ok(user)
+    return goat.OK(user)
 }
 ```
 
 ## Accessing Headers
 ```go
 func Home(g goat.Goat) *goat.ServerResponse{
-    header := g.Headers().get("Header") //Retrive request header
-    return Ok(header)
+    header := g.Header().Get("Header") //Retrieve request header
+   	return goat.BadGateway(header)
 }
 ```
 
@@ -77,7 +77,7 @@ func Home(g goat.Goat) *goat.ServerResponse{
 ```go
 func Users(g goat.Goat) *goat.ServerResponse{
     pathFrag := g.Vars()["user"]
-    return Ok(pathFrag)
+    return goat.OK(pathFrag)
 }
 
 func main() {
@@ -86,11 +86,6 @@ func main() {
     //.. omitted for brevity
 
 }
-```
-
-## Accessing Request Object 
-```go
-
 ```
 
 ## Returning Response Code
@@ -173,22 +168,22 @@ func Home(g goat.AuthGoat) *goat.ServerResponse{
             Name: "kirin",
             Email: "kirinnee97@gmail.com",
        }
-    return goat.Ok(user)
+    return goat.OK(user)
 }
 
 
 func main() {
 
     var addr = flag.String("addr", ":9000", "http service address")
-	flag.Parse()
+    flag.Parse()
     // Auth Server 
     r := goat.NewAuth("https://domain.region.auth0.com/") //Auth0 issuing endpoint
-    
+
     // Require Authenticated user
     r.ServePrivate("/", Home).Methods("GET")
 
-	log.Println("Listening")
-	log.Fatal(http.ListenAndServe(*addr, s))
+    log.Println("Listening")
+    log.Fatal(http.ListenAndServe(*addr, r))
 }
 ```
 
@@ -206,12 +201,12 @@ type CustomClaim struct {
 Cast Claims when using goat object 
 ```go
 func Home(g goat.AuthGoat) *goat.ServerResponse{
-	   claim := g.GetClaims(&CustomClaim{}).(*CustomClaim)
-       user := User{
-            Name: "kirin",
-            Email: claim.Email,
-       }
-       return goat.Ok(user)
+	claim := g.Claims(&CustomClaim{}).(*CustomClaim)
+    user := User{
+        Name:  "kirin",
+        Email: claim.Email,
+    }
+    return goat.OK(user)
 }
 
 ```
