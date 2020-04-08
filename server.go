@@ -80,6 +80,9 @@ func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Rou
 			resp:      w,
 		}
 		response := handler(&g)
+		if response == nil {
+			return
+		}
 		w.WriteHeader(response.Status)
 		if response.Content != nil {
 			resp(w, response.Content)
