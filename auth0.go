@@ -34,7 +34,7 @@ type authGoat struct {
 }
 
 func (g *authGoat) Claims(claims jwt.Claims) jwt.Claims {
-	authHeaderParts := strings.Split(g.r.Header.Get("Authorization"), " ")
+	authHeaderParts := strings.Split(g.req.Header.Get("Authorization"), " ")
 	t := authHeaderParts[1]
 	token, _ := jwt.ParseWithClaims(t, claims, func(token *jwt.Token) (interface{}, error) {
 		cert, err := getPemCert(token, g.domain)
@@ -56,7 +56,8 @@ func (s *Auth0Server) ServePrivate(path string, handler func(AuthGoat) *ServerRe
 				domain: s.domain,
 				goat: &goat{
 					variables: mux.Vars(r),
-					r:         r,
+					req:       r,
+					resp:      w,
 				},
 			}
 			response := handler(&g)

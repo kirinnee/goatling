@@ -39,7 +39,8 @@ func getBody(r *http.Request, any interface{}) *ServerResponse {
 
 type goat struct {
 	variables map[string]string
-	r         *http.Request
+	req       *http.Request
+	resp      http.ResponseWriter
 }
 
 type Goat interface {
@@ -47,14 +48,19 @@ type Goat interface {
 	Body(any interface{}) *ServerResponse
 	Header() *http.Header
 	Request() *http.Request
+	Response() http.ResponseWriter
 }
 
 func (g *goat) Request() *http.Request {
-	return g.r
+	return g.req
+}
+
+func (g *goat) Response() http.ResponseWriter {
+	return g.resp
 }
 
 func (g *goat) Header() *http.Header {
-	return &g.r.Header
+	return &g.req.Header
 }
 
 func (g *goat) Vars() map[string]string {
@@ -63,14 +69,15 @@ func (g *goat) Vars() map[string]string {
 }
 
 func (g *goat) Body(any interface{}) *ServerResponse {
-	return getBody(g.r, any)
+	return getBody(g.req, any)
 }
 
 func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Route {
 	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		g := goat{
 			variables: mux.Vars(r),
-			r:         r,
+			req:       r,
+			resp:      w,
 		}
 		response := handler(&g)
 		w.WriteHeader(response.Status)
