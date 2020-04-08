@@ -154,6 +154,29 @@ func Users(g goat.Goat) *goat.ServerResponse {
 }
 ```
 
+# Enabling CORS
+```go
+// Set CORS before serving any page 
+
+func main() {
+
+	var addr = flag.String("addr", ":9000", "http service address")
+	flag.Parse()
+	// Normal Server
+	r := goat.New()
+
+    r.SetCORS("*") 
+
+	// Now you can use r and a like gorilla mux server
+	r.Serve("/", Home).Methods("GET")
+
+	log.Println("Listening")
+	log.Fatal(http.ListenAndServe(*addr, r))
+}
+
+
+```
+
 # Using Auth0 Integrated Server
 ```go
 // Sample Response Model

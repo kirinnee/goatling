@@ -9,11 +9,22 @@ import (
 )
 
 type Server struct {
+	cors       string
+	enableCors bool
 	*mux.Router
 }
 
 func New() *Server {
-	return &Server{mux.NewRouter()}
+	s := &Server{enableCors: false, cors: "", Router: mux.NewRouter()}
+	return s
+}
+
+func (s *Server) SetCORS(cors string) {
+	if !s.enableCors {
+		s.Use(mux.CORSMethodMiddleware(s.Router))
+		s.enableCors = true
+	}
+	s.cors = cors
 }
 
 func resp(w http.ResponseWriter, any interface{}) {
@@ -73,7 +84,13 @@ func (g *goat) Body(any interface{}) *ServerResponse {
 }
 
 func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Route {
-	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+	route := s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		if s.enableCors {
+			w.Header().Set("Access-Control-Allow-Origin", s.cors)
+			if r.Method == http.MethodOptions {
+				return
+			}
+		}
 		g := goat{
 			variables: mux.Vars(r),
 			req:       r,
@@ -88,4 +105,10 @@ func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Rou
 			resp(w, response.Content)
 		}
 	})
+
+	if s.enableCors {
+		route.Methods(http.MethodOptions)
+	}
+	return route
+
 }
