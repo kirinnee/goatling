@@ -81,10 +81,10 @@ func (s *Auth0Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if s.enableCors {
 		(w).Header().Set("Access-Control-Allow-Origin", s.cors)
-		(w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		(w).Header().Set("Access-Control-Allow-Methods", "*")
 
 		if r.Method == "OPTIONS" {
-			(w).Header().Set("Access-Control-Allow-Headers", "content-type")
+			(w).Header().Set("Access-Control-Allow-Headers", "*")
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
