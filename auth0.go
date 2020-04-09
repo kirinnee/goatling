@@ -49,7 +49,7 @@ func (g *authGoat) Claims(claims jwt.Claims) jwt.Claims {
 }
 
 func (s *Auth0Server) ServePrivate(path string, handler func(AuthGoat) *ServerResponse) *mux.Route {
-	route := s.Handle(path, negroni.New(
+	return s.Handle(path, negroni.New(
 		negroni.HandlerFunc(s.middleware.HandlerWithNext),
 		negroni.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if s.enableCors {
@@ -75,8 +75,19 @@ func (s *Auth0Server) ServePrivate(path string, handler func(AuthGoat) *ServerRe
 				resp(w, response.Content)
 			}
 		}))))
+}
+
+func (s *Auth0Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
 	if s.enableCors {
-		route.Methods(http.MethodOptions)
+		(w).Header().Set("Access-Control-Allow-Origin", s.cors)
+		(w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+		if r.Method == "OPTIONS" {
+			(w).Header().Set("Access-Control-Allow-Headers", "content-type")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 	}
-	return route
+	s.Router.ServeHTTP(w, r)
 }

@@ -84,7 +84,7 @@ func (g *goat) Body(any interface{}) *ServerResponse {
 }
 
 func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Route {
-	route := s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		if s.enableCors {
 			w.Header().Set("Access-Control-Allow-Origin", s.cors)
 			if r.Method == http.MethodOptions {
@@ -105,10 +105,19 @@ func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Rou
 			resp(w, response.Content)
 		}
 	})
+}
+
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if s.enableCors {
-		route.Methods(http.MethodOptions)
-	}
-	return route
+		(w).Header().Set("Access-Control-Allow-Origin", a.cors)
+		(w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
+		if r.Method == "OPTIONS" {
+			(w).Header().Set("Access-Control-Allow-Headers", "content-type")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+	}
+	s.Router.ServeHTTP(w, r)
 }
