@@ -110,7 +110,7 @@ func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Rou
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if s.enableCors {
-		(w).Header().Set("Access-Control-Allow-Origin", a.cors)
+		(w).Header().Set("Access-Control-Allow-Origin", s.cors)
 		(w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
 		if r.Method == "OPTIONS" {
