@@ -119,7 +119,7 @@ func (s *Server) ServeString(path string, handler func(Goat) *ServerResponse) *m
 	})
 }
 
-func (s *Server) ServeRaw(path string, handler func(Goat) *RawServerResponse) *mux.Route {
+func (s *Server) ServeRaw(path string, handler func(Goat) *ServerResponse) *mux.Route {
 	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 
 		g := goat{
@@ -133,7 +133,7 @@ func (s *Server) ServeRaw(path string, handler func(Goat) *RawServerResponse) *m
 		}
 		w.WriteHeader(response.Status)
 		if response.Content != nil {
-			respRaw(w, response.Content)
+			respRaw(w, response.Content.([]byte))
 		}
 	})
 }

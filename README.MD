@@ -56,12 +56,50 @@ func main() {
 
 ```
 
+
+
 ## Accessing Body as JSON
 ```go
 func Home(g goat.Goat) *goat.ServerResponse{
     var user User
     g.Body(&user) //Reads request into user struct
     return goat.OK(user)
+}
+```
+
+## Accessing Body as string
+```go
+func Home(g goat.Goat) *goat.ServerResponse{
+
+    s := g.BodyString() //Reads request as a string
+    return goat.OK(s)
+}
+```
+
+## Accessing Body as byte array
+```go
+func Home(g goat.Goat) *goat.ServerResponse{
+
+    s := g.BodyBytes() //Reads request as a byte array
+    return goat.OK(s)
+}
+```
+
+## Serving Raw Response (Byte Array) instead of JSON response
+```go
+func main() {
+
+	var addr = flag.String("addr", ":9000", "http service address")
+	flag.Parse()
+	r := goat.New()
+    
+    // Use Serve Raw. The function `Home` must return content as byte array
+	r.ServeRaw("/", Home).Methods("GET")
+
+
+
+	log.Println("Listening")
+	log.Fatal(http.ListenAndServe(*addr, r))
 }
 ```
 
