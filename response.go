@@ -7,6 +7,11 @@ type ServerResponse struct {
 	Content interface{}
 }
 
+type RawServerResponse struct {
+	Status  int
+	Content []byte
+}
+
 func InternalServerError(any interface{}) *ServerResponse {
 	return &ServerResponse{
 		Status:  http.StatusInternalServerError,

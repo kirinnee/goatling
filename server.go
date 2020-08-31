@@ -35,6 +35,13 @@ func resp(w http.ResponseWriter, any interface{}) {
 	}
 }
 
+func respRaw(w http.ResponseWriter, any []byte) {
+	_, err := w.Write(any)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func getBody(r *http.Request, any interface{}) *ServerResponse {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -57,6 +64,8 @@ type goat struct {
 type Goat interface {
 	Vars() map[string]string
 	Body(any interface{}) *ServerResponse
+	BodyString() string
+	BodyBytes() []byte
 	Header() *http.Header
 	Request() *http.Request
 	Response() http.ResponseWriter
@@ -83,14 +92,55 @@ func (g *goat) Body(any interface{}) *ServerResponse {
 	return getBody(g.req, any)
 }
 
+func (g *goat) BodyString() string {
+	return string(g.BodyBytes())
+}
+
+func (g *goat) BodyBytes() []byte {
+	b, _ := ioutil.ReadAll(g.req.Body)
+	return b
+}
+
+func (s *Server) ServeString(path string, handler func(Goat) *ServerResponse) *mux.Route {
+	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+		g := goat{
+			variables: mux.Vars(r),
+			req:       r,
+			resp:      w,
+		}
+		response := handler(&g)
+		if response == nil {
+			return
+		}
+		w.WriteHeader(response.Status)
+		if response.Content != nil {
+			resp(w, response.Content)
+		}
+	})
+}
+
+func (s *Server) ServeRaw(path string, handler func(Goat) *RawServerResponse) *mux.Route {
+	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+
+		g := goat{
+			variables: mux.Vars(r),
+			req:       r,
+			resp:      w,
+		}
+		response := handler(&g)
+		if response == nil {
+			return
+		}
+		w.WriteHeader(response.Status)
+		if response.Content != nil {
+			respRaw(w, response.Content)
+		}
+	})
+}
+
 func (s *Server) Serve(path string, handler func(Goat) *ServerResponse) *mux.Route {
 	return s.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		if s.enableCors {
-			w.Header().Set("Access-Control-Allow-Origin", s.cors)
-			if r.Method == http.MethodOptions {
-				return
-			}
-		}
+
 		g := goat{
 			variables: mux.Vars(r),
 			req:       r,
