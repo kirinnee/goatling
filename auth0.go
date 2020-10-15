@@ -15,10 +15,10 @@ type Auth0Server struct {
 	*Server
 }
 
-func NewAuth(domain string) *Auth0Server {
+func NewAuth(domain string, aud string) *Auth0Server {
 	return &Auth0Server{
 		domain:     domain,
-		middleware: jwtMiddleware(domain),
+		middleware: jwtMiddleware(domain, aud),
 		Server:     New(),
 	}
 }

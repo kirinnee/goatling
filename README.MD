@@ -238,7 +238,7 @@ func main() {
     var addr = flag.String("addr", ":9000", "http service address")
     flag.Parse()
     // Auth Server 
-    r := goat.NewAuth("https://domain.region.auth0.com/") //Auth0 issuing endpoint
+    r := goat.NewAuth("https://domain.region.auth0.com/", "http://youdomain" ) //Auth0 issuing endpoint (iss), API identifier (aud)
 
     // Require Authenticated user
     r.ServePrivate("/", Home).Methods("GET")

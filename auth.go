@@ -7,6 +7,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"log"
 	"net/http"
+	"time"
 )
 
 type (
@@ -53,10 +54,20 @@ func getPemCert(token *jwt.Token, domain string) (string, error) {
 	return cert, nil
 }
 
-func jwtMiddleware(domain string) *jwtmiddleware.JWTMiddleware {
+func jwtMiddleware(domain string, aud string) *jwtmiddleware.JWTMiddleware {
 	return jwtmiddleware.New(
 		jwtmiddleware.Options{
 			ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+				// Verify 'aud' claim
+				checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
+				if !checkAud {
+					return token, errors.New("invalid audience")
+				}
+
+				checkExpiry := token.Claims.(jwt.MapClaims).VerifyExpiresAt(time.Now().Unix(), false)
+				if !checkExpiry {
+					return token, errors.New("expired")
+				}
 
 				// Verify 'iss' claim
 				iss := domain
